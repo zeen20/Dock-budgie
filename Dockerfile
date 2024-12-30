@@ -1,25 +1,38 @@
-FROM ubuntu:plucky-20241213
+FROM ubuntu:latest
 
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y ubuntu-budgie-desktop
+# Set the DEBIAN_FRONTEND to noninteractive to suppress prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt install -y xrdp && adduser xrdp ssl-cert
+# Update and install required packages
+RUN apt update && \
+    apt install -y ubuntu-desktop lightdm xrdp sudo openssl && \
+    apt clean && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m testuser -p $(openssl passwd 1234) && \
-    usermod -aG sudo testuser
+# Configure LightDM for autologin
+RUN echo "\
+[Seat:*]\n\
+autologin-user=root\n\
+autologin-user-timeout=0\n\
+" > /etc/lightdm/lightdm.conf.d/50-autologin.conf
 
-#####################
-# Budgie panel (fix)
-#####################
-RUN sed -i '3 a echo "\
-budgie-panel & budgie-wm --x11 & plank" > ~/.Xsession' /etc/xrdp/startwm.sh
+# Create a new user and set a password
+RUN useradd -m baynar && \
+    echo "baynar:123456" | chpasswd && \
+    usermod -aG sudo baynar
 
-RUN sed -i '3 a echo "\
-export XDG_SESSION_DESKTOP=budgie-desktop\\n\
-export XDG_SESSION_TYPE=x11\\n\
-export XDG_CURRENT_DESKTOP=Budgie:GNOME\\n\
-export XDG_CONFIG_DIRS=/etc/xdg/xdg-budgie-desktop:/etc/xdg\\n\
-" > ~/.xsessionrc' /etc/xrdp/startwm.sh
+# Configure XRDP session
+RUN echo "\
+export XDG_SESSION_DESKTOP=ubuntu\n\
+export XDG_SESSION_TYPE=x11\n\
+export XDG_CURRENT_DESKTOP=ubuntu:GNOME\n\
+export XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg\n\
+" > /root/.xsessionrc
 
+# Expose XRDP port
 EXPOSE 3389
 
-CMD service dbus start; /usr/lib/systemd/systemd-logind & service xrdp start; bash
+# Set the default command to start services
+CMD service dbus start && \
+    service xrdp start && \
+    service lightdm start && \
+    tail -f /dev/null
