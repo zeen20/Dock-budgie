@@ -1,0 +1,25 @@
+FROM ubuntu:plucky-20241213
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y ubuntu-budgie-desktop
+
+RUN apt install -y xrdp && adduser xrdp ssl-cert
+
+RUN useradd -m testuser -p $(openssl passwd 1234) && \
+    usermod -aG sudo testuser
+
+#####################
+# Budgie panel (fix)
+#####################
+RUN sed -i '3 a echo "\
+budgie-panel & budgie-wm --x11 & plank" > ~/.Xsession' /etc/xrdp/startwm.sh
+
+RUN sed -i '3 a echo "\
+export XDG_SESSION_DESKTOP=budgie-desktop\\n\
+export XDG_SESSION_TYPE=x11\\n\
+export XDG_CURRENT_DESKTOP=Budgie:GNOME\\n\
+export XDG_CONFIG_DIRS=/etc/xdg/xdg-budgie-desktop:/etc/xdg\\n\
+" > ~/.xsessionrc' /etc/xrdp/startwm.sh
+
+EXPOSE 3389
+
+CMD service dbus start; /usr/lib/systemd/systemd-logind & service xrdp start; bash
