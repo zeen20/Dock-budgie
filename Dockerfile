@@ -9,7 +9,7 @@ RUN apt update && \
 # Create a user and add to sudo group
 RUN useradd -m baynar && \
     echo "baynar:123456" | chpasswd && \
-    usermod -aG sudo testuser
+    usermod -aG sudo baynar
 
 # Expose port 3389
 EXPOSE 3389
