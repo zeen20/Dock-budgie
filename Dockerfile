@@ -94,5 +94,16 @@ RUN gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/ba
 # Clean up unnecessary files
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Create a new user 'baynar' with password '123456'
+RUN useradd -m -s /bin/bash baynar && \
+    echo "baynar:123456" | chpasswd && \
+    usermod -aG sudo baynar
+
+# Allow 'baynar' to run commands without password
+RUN echo "baynar ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/baynar
+
+# Switch to the baynar user
+USER baynar
+
 # Set environment for Chrome Remote Desktop to run
-CMD ["/opt/google/chrome-remote-desktop/start-host", "--code", "4/0AanRRrt9T5uDMb8xL6PKMkPSyCD94L9EBAc5QhlUHhmzfMj8TOC0FOgPHViT_RhBoOrQfQ", "--redirect-url", "https://remotedesktop.google.com/_/oauthredirect", "--name", "$(hostname)", "--pin", "123456"]
+CMD ["/opt/google/chrome-remote-desktop/start-host", "--code", "4/0AanRRrtZ5E76YhSTMLEqyEhYTQaPzs5-57XsBb1jFkm457idsn22fr3PxARPRF8AA1qHvw", "--redirect-url", "https://remotedesktop.google.com/_/oauthredirect", "--name", "$(hostname)", "--pin", "123456"]
