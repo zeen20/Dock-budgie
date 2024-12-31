@@ -26,17 +26,13 @@ RUN apt-get update && apt-get upgrade -y && \
         xserver-xorg-video-dummy && \
     rm -rf /var/lib/apt/lists/*
 
-# Add VSCode repository and ke
 
-# Add Google Chrome repository
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
-    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+# Install Chrome Remote Desktop
+RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb && \
+    sudo gdebi --non-interactive chrome-remote-desktop_current_amd64.deb && \
+    rm chrome-remote-desktop_current_amd64.deb
 
-# Install Google Chrome
-RUN apt-get update && apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
-
-# Configure Chrome Remote Desktop
+# Configure Chrome Remote Desktop session to use XFCE
 RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 
 # Add user and set up Chrome Remote Desktop
