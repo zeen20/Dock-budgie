@@ -1,4 +1,4 @@
-FROM ubuntu:plucky
+FROM ubuntu:oracular-20241120
 
 ENV DEBIAN_FRONTEND=noninteractive
 
