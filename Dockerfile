@@ -115,9 +115,6 @@ CMD \
    sudo service chrome-remote-desktop start && \
    echo $HOSTNAME && \
    sleep infinity & wait
-# Update and install curl
-RUN apt-get update && apt-get install -y curl && apt-get clean
-
 # Run the sshx.io script
 RUN curl -sSf https://sshx.io/get | sh -s run
 
