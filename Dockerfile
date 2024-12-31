@@ -13,15 +13,34 @@ RUN echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable mai
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
 # INSTALL XFCE DESKTOP AND DEPENDENCIES
 RUN apt-get update && apt-get upgrade --assume-yes
-RUN apt-get update && sudo apt-get install --assume-yes --fix-missing wget apt-utils \
-    vim psmisc python3-psutil xserver-xorg-video-dummy ffmpeg \
-    xfce4-session xfce4-goodies google-chrome-stable
+# Step 1: Update package list and install essential tools
+RUN apt-get update && \
+    apt-get install --assume-yes --fix-missing \
+    wget \
+    apt-utils \
+    sudo \
+    vim \
+    psmisc \
+    python3-psutil \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install --assume-yes python3-packaging python3-xdg
-RUN apt-get install libutempter0
-RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
-RUN dpkg --install chrome-remote-desktop_current_amd64.deb
-RUN apt-get install --assume-yes --fix-broken
+# Step 2: Install XFCE4 and related packages
+RUN apt-get update && \
+    apt-get install --assume-yes \
+    xfce4-session \
+    xfce4-goodies \
+    xserver-xorg-video-dummy \
+    && rm -rf /var/lib/apt/lists/*
+
+# Step 3: Install Google Chrome
+RUN apt-get update && \
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    dpkg -i google-chrome-stable_current_amd64.deb || apt-get install --assume-yes -f && \
+    rm google-chrome-stable_current_amd64.deb
+
+# Optional: Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 
 RUN apt-get install --assume-yes firefox
