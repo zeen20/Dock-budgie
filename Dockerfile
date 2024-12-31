@@ -5,13 +5,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # INSTALL SOURCES FOR CHROME REMOTE DESKTOP AND VSCODE
 RUN apt-get update && apt-get upgrade --assume-yes
 RUN apt-get --assume-yes install curl gpg sudo wget apt-utils
+# Add Microsoft's repository key
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg && \
     mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+# Add Google's repository key (modified)
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/trusted.gpg.d/google-archive.gpg
+
+# Add repositories for VSCode and Google Chrome
 RUN echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | \
-   tee /etc/apt/sources.list.d/vs-code.list
-RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-# INSTALL XFCE DESKTOP AND DEPENDENCIES
+    tee /etc/apt/sources.list.d/vs-code.list
+
+RUN echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" | \
+    tee /etc/apt/sources.list.d/google-chrome.list
+# INSTALL Gnome DESKTOP AND DEPENDENCIES
 RUN apt-get update && apt-get upgrade --assume-yes
 
 # Update package list and install necessary packages
