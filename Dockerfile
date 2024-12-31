@@ -13,8 +13,10 @@ RUN echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable mai
 RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
 # INSTALL XFCE DESKTOP AND DEPENDENCIES
 RUN apt-get update && apt-get upgrade --assume-yes
-RUN apt-get install --assume-yes --fix-missing sudo wget apt-utils xvfb xfce4 xbase-clients \
-    desktop-base vim xscreensaver google-chrome-stable python-psutil psmisc python3-psutil xserver-xorg-video-dummy ffmpeg
+RUN apt-get update && sudo apt-get install --assume-yes --fix-missing wget apt-utils \
+    vim psmisc python3-psutil xserver-xorg-video-dummy ffmpeg \
+    xfce4-session xfce4-goodies google-chrome-stable
+
 RUN apt-get install --assume-yes python3-packaging python3-xdg
 RUN apt-get install libutempter0
 RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
