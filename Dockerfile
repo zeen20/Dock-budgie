@@ -27,8 +27,8 @@ RUN apt-get update && apt-get upgrade -y && \
     rm -rf /var/lib/apt/lists/*
 
 
-# Install Chrome Remote Desktop
-RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb && \
+# Install Chrome Remote Desktop using wget with --no-check-certificate
+RUN wget --no-check-certificate https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb && \
     sudo gdebi --non-interactive chrome-remote-desktop_current_amd64.deb && \
     rm chrome-remote-desktop_current_amd64.deb
 
