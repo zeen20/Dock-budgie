@@ -1,60 +1,53 @@
 FROM ubuntu:focal
 
+# Set non-interactive environment to avoid prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# INSTALL SOURCES FOR CHROME REMOTE DESKTOP AND VSCODE
-RUN apt-get update && apt-get upgrade --assume-yes
-RUN apt-get --assume-yes install curl gpg wget
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg && \
-    mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | \
-   tee /etc/apt/sources.list.d/vs-code.list
-RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+# Update system and install prerequisites
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
+    sudo wget gdebi-core curl gnupg2 \
+    xorg openbox \
+    pulseaudio \
+    libnss3 libxss1 libgconf-2-4 \
+    dbus-x11 \
+    gnome-session gnome-shell \
+    gnome-terminal \
+    gnome-control-center \
+    gnome-icon-theme \
+    gnome-backgrounds \
+    gvfs-backends \
+    gvfs-fuse \
+    nautilus \
+    x11-xserver-utils
 
-# INSTALL GNOME DESKTOP ENVIRONMENT AND DEPENDENCIES
-RUN apt-get update && apt-get upgrade --assume-yes
-RUN apt-get install --assume-yes --fix-missing sudo wget apt-utils gnome-core gnome-terminal \
-    desktop-base vim xscreensaver google-chrome-stable python-psutil psmisc python3-psutil \
-    xserver-xorg-video-dummy ffmpeg pulseaudio
+# Download Chrome Remote Desktop package
+RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb -O /tmp/chrome-remote-desktop_current_amd64.deb
 
-# INSTALL CHROME REMOTE DESKTOP
-RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
-RUN dpkg --install chrome-remote-desktop_current_amd64.deb
-RUN apt-get install --assume-yes --fix-broken
-RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/gnome-session" > /etc/chrome-remote-desktop-session'
+# Install the Chrome Remote Desktop package
+RUN sudo gdebi /tmp/chrome-remote-desktop_current_amd64.deb -n
 
-RUN apt-get install --assume-yes firefox
+# Clean up the downloaded package
+RUN rm /tmp/chrome-remote-desktop_current_amd64.deb
 
-# ---------------------------------------------------------- 
-# SPECIFY VARIABLES FOR SETTING UP CHROME REMOTE DESKTOP
-ARG USER=baynar
-# use 6 digits at least
+# Set up Chrome Remote Desktop session to use GNOME
+RUN echo "exec /usr/bin/gnome-session" > /etc/chrome-remote-desktop-session
+
+# Add user and configure Chrome Remote Desktop
+ARG USER=youruser
 ENV PIN=123456
-ENV CODE=4/xxx
+ENV CODE=your-code
 ENV HOSTNAME=myvirtualdesktop
-# ---------------------------------------------------------- 
-# ADD USER TO THE SPECIFIED GROUPS
-RUN adduser --disabled-password --gecos '' $USER
-RUN mkhomedir_helper $USER
-RUN adduser $USER sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-RUN usermod -aG chrome-remote-desktop $USER
-USER $USER
-WORKDIR /home/$USER
-RUN mkdir -p .config/chrome-remote-desktop
-RUN chown "$USER:$USER" .config/chrome-remote-desktop
-RUN chmod a+rx .config/chrome-remote-desktop
-RUN touch .config/chrome-remote-desktop/host.json
-RUN echo "/usr/bin/pulseaudio --start" > .chrome-remote-desktop-session
-RUN echo "gnome-session --display=:1030" >> .chrome-remote-desktop-session
 
+RUN adduser --disabled-password --gecos '' $USER
+RUN mkdir -p /home/$USER/.config/chrome-remote-desktop
+RUN chown $USER:$USER /home/$USER/.config/chrome-remote-desktop
+RUN touch /home/$USER/.config/chrome-remote-desktop/host.json
+
+# Expose ports for Chrome Remote Desktop
+EXPOSE 3389
+
+# Start the virtual display, Chrome Remote Desktop, and set up the session
 CMD \
-   DISPLAY= /opt/google/chrome-remote-desktop/start-host --code=$CODE --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$HOSTNAME --pin=$PIN ; \
-   HOST_HASH=$(echo -n $HOSTNAME | md5sum | cut -c -32) && \
-   FILENAME=.config/chrome-remote-desktop/host#${HOST_HASH}.json && echo $FILENAME && \
-   cp .config/chrome-remote-desktop/host#*.json $FILENAME ; \
-   sudo service chrome-remote-desktop stop && \
-   sudo service chrome-remote-desktop start && \
-   echo $HOSTNAME && \
-   sleep infinity & wait
+   Xvfb :0 -screen 0 1024x768x24 & \
+   /usr/bin/pulseaudio --start & \
+   /opt/google/chrome-remote-desktop/start-host --code=$CODE --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$HOSTNAME --pin=$PIN
