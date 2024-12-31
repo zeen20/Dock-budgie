@@ -15,52 +15,15 @@ RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable 
 RUN apt-get update && apt-get upgrade --assume-yes
 
 # Update package list and install necessary packages
-RUN apt-get update && apt-get install -y \
-    curl \
-    wget \
-    unzip \
-    sudo \
-    ufw \
-    gnome-session \
-    gnome-shell \
-    gnome-control-center \
-    gnome-terminal \
-    gnome-settings-daemon \
-    gnome-software \
-    gnome-calculator \
-    gnome-disk-utility \
-    gnome-screenshot \
-    gnome-system-monitor \
-    gnome-tweaks \
-    nautilus \
-    gnome-music \
-    totem \
-    gnome-notes \
-    file-roller \
-    p7zip-full \
-    gnome-calendar \
-    gnome-characters \
-    gnome-contacts \
-    gnome-maps \
-    gnome-weather \
-    gnome-shell-extensions \
-    gnome-clocks \
-    gnome-font-viewer \
-    vlc \
-    hardinfo \
-    gedit \
-    git \
-    gdebi \
-    bleachbit \
-    shotwell \
-    xpdf \
-    gftp \
-    qbittorrent \
-    yaru-theme-gtk \
-    yaru-theme-icon \
-    plasma-discover \
-    flatpak \
-    plasma-discover-backend-flatpak \
+RUN apt-get update && apt-get install -y --fix-missing \
+    curl wget unzip sudo ufw gnome-session gnome-shell gnome-control-center \
+    gnome-terminal gnome-settings-daemon gnome-software gnome-calculator \
+    gnome-disk-utility gnome-screenshot gnome-system-monitor gnome-tweaks \
+    nautilus gnome-music totem gnome-notes file-roller p7zip-full \
+    gnome-calendar gnome-characters gnome-contacts gnome-maps gnome-weather \
+    gnome-shell-extensions gnome-clocks gnome-font-viewer vlc hardinfo \
+    gedit git gdebi bleachbit shotwell xpdf gftp qbittorrent yaru-theme-gtk \
+    yaru-theme-icon plasma-discover flatpak plasma-discover-backend-flatpak \
     && apt-get clean
 
 # Install PeaZip and Free Download Manager
