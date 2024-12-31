@@ -1,81 +1,71 @@
-FROM ubuntu:oracular
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# INSTALL SOURCES FOR CHROME REMOTE DESKTOP AND VSCODE
-RUN apt-get update && apt-get upgrade --assume-yes
-RUN apt-get --assume-yes install curl gpg curl wget unzip sudo vlc hardinfo gedit git gdebi ufw && sudo rm -rf /var/lib/apt/lists/*
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg && \
-    mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN echo "deb [arch=amd64] http://packages.microsoft.com/repos/vscode stable main" | \
-   tee /etc/apt/sources.list.d/vs-code.list
-RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-# INSTALL XFCE DESKTOP AND DEPENDENCIES
-RUN apt-get update && apt-get upgrade --assume-yes
-# Step 1: Update package list and install essential tools
-RUN apt-get update && \
-    apt-get install --assume-yes --fix-missing \
-    wget \
-    apt-utils \
-    sudo \
-    vim \
-    psmisc \
-    python3-psutil \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+# Install essential packages and add Chrome/VSCode repositories
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+        curl \
+        gpg \
+        wget \
+        unzip \
+        sudo \
+        vlc \
+        hardinfo \
+        gedit \
+        git \
+        gdebi-core \
+        ufw \
+        apt-utils \
+        vim \
+        psmisc \
+        python3-psutil \
+        ffmpeg \
+        xfce4-session \
+        xfce4-goodies \
+        xserver-xorg-video-dummy && \
+    rm -rf /var/lib/apt/lists/*
 
-# Step 2: Install XFCE4 and related packages
-RUN apt-get update && \
-    apt-get install --assume-yes \
-    xfce4-session \
-    xfce4-goodies \
-    xserver-xorg-video-dummy \
-    && rm -rf /var/lib/apt/lists/*
+# Add VSCode repository and key
+RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg && \
+    echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
 
-# Step 3: Install Google Chrome
-RUN apt-get update && \
-    apt-get install --assume-yes gdebi-core && \
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    gdebi --non-interactive google-chrome-stable_current_amd64.deb && \
-    rm google-chrome-stable_current_amd64.deb
+# Add Google Chrome repository
+RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
 
-# Optional: Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install Google Chrome
+RUN apt-get update && apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configure Chrome Remote Desktop
 RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
 
-#  RUN apt-get install --assume-yes firefox
-# ---------------------------------------------------------- 
-# SPECIFY VARIABLES FOR SETTING UP CHROME REMOTE DESKTOP
-ARG USER=myuser
-# use 6 digits at least
-ENV PIN=123456
-ENV CODE=4/xxx
-ENV HOSTNAME=myvirtualdesktop
-# ---------------------------------------------------------- 
-# ADD USER TO THE SPECIFIED GROUPS
-RUN adduser --disabled-password --gecos '' $USER
-RUN mkhomedir_helper $USER
-RUN adduser $USER sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-# Ensure the chrome-remote-desktop group exists
-RUN groupadd chrome-remote-desktop || true
-# Add the user to the chrome-remote-desktop group
-RUN usermod -aG chrome-remote-desktop $USER
+# Add user and set up Chrome Remote Desktop
+ARG USER=baynar
+ARG PIN=123456
+ARG CODE=4/xxx
+ARG HOSTNAME=myvirtualdesktop
+
+RUN adduser --disabled-password --gecos "" $USER && \
+    adduser $USER sudo && \
+    groupadd chrome-remote-desktop || true && \
+    usermod -aG chrome-remote-desktop $USER && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
 USER $USER
 WORKDIR /home/$USER
-RUN mkdir -p .config/chrome-remote-desktop
-RUN chown "$USER:$USER" .config/chrome-remote-desktop
-RUN chmod a+rx .config/chrome-remote-desktop
-RUN touch .config/chrome-remote-desktop/host.json
-RUN echo "/usr/bin/pulseaudio --start" > .chrome-remote-desktop-session
-RUN echo "startxfce4 :1030" >> .chrome-remote-desktop-session
-CMD \
-   DISPLAY= /opt/google/chrome-remote-desktop/start-host --code=$CODE --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=$HOSTNAME --pin=$PIN ; \
-   HOST_HASH=$(echo -n $HOSTNAME | md5sum | cut -c -32) && \
-   FILENAME=.config/chrome-remote-desktop/host#${HOST_HASH}.json && echo $FILENAME && \
-   cp .config/chrome-remote-desktop/host#*.json $FILENAME ; \
-   sudo service chrome-remote-desktop stop && \
-   sudo service chrome-remote-desktop start && \
-   echo $HOSTNAME && \
-   sleep infinity & wait
+
+RUN mkdir -p .config/chrome-remote-desktop && \
+    chown "$USER:$USER" .config/chrome-remote-desktop && \
+    chmod a+rx .config/chrome-remote-desktop && \
+    echo "/usr/bin/pulseaudio --start" > ~/.chrome-remote-desktop-session && \
+    echo "startxfce4" >> ~/.chrome-remote-desktop-session
+
+# Start Chrome Remote Desktop
+CMD DISPLAY= /opt/google/chrome-remote-desktop/start-host \
+    --code="$CODE" \
+    --redirect-url="https://remotedesktop.google.com/_/oauthredirect" \
+    --name="$HOSTNAME" \
+    --pin="$PIN" && \
+    sleep infinity
