@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --fix-missing \
     nautilus gnome-music totem gnome-notes file-roller p7zip-full \
     gnome-calendar gnome-characters gnome-contacts gnome-maps gnome-weather \
     gnome-shell-extensions gnome-clocks gnome-font-viewer vlc hardinfo \
-    gedit git gdebi bleachbit shotwell xpdf gftp qbittorrent yaru-theme-gtk \
+    gedit git gdebi bleachbit shotwell gftp qbittorrent yaru-theme-gtk \
     yaru-theme-icon plasma-discover flatpak plasma-discover-backend-flatpak \
     && apt-get clean
 
