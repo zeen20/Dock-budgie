@@ -58,6 +58,9 @@ RUN adduser --disabled-password --gecos '' $USER
 RUN mkhomedir_helper $USER
 RUN adduser $USER sudo
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+# Ensure the chrome-remote-desktop group exists
+RUN groupadd chrome-remote-desktop || true
+# Add the user to the chrome-remote-desktop group
 RUN usermod -aG chrome-remote-desktop $USER
 USER $USER
 WORKDIR /home/$USER
