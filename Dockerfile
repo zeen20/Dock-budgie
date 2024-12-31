@@ -68,10 +68,18 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # RUN apt-get install --assume-yes python3-packaging python3-xdg vim google-chrome-stable python-psutil psmisc python3-psutil xserver-xorg-video-dummy ffmpeg xvfb xbase-clients
 # RUN apt-get install libutempter0
+# Install necessary dependencies first
+RUN apt-get update && apt-get install -y \
+    wget \
+    gdebi \
+    xvfb \
+    && apt-get clean
+
 # Install Chrome Remote Desktop
 RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb -O /tmp/chrome-remote-desktop_current_amd64.deb \
     && gdebi /tmp/chrome-remote-desktop_current_amd64.deb -n \
     && rm /tmp/chrome-remote-desktop_current_amd64.deb
+
 # RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/gnome-session" > /etc/chrome-remote-desktop-session'
 RUN echo "exec gnome-session" > /root/.chrome-remote-desktop-session
 
