@@ -57,7 +57,7 @@ RUN gsettings set org.gnome.desktop.interface gtk-theme "Yaru" \
     && gsettings set org.gnome.desktop.interface cursor-theme "Yaru"
 
 # Set GNOME session to never sleep
-RUN gsettings set org.gnome.desktop.session idle-delay 0
+# RUN gsettings set org.gnome.desktop.session idle-delay 0
 
 # Set background and favorites
 RUN gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/backgrounds/warty-final-ubuntu.png" \
@@ -115,3 +115,5 @@ CMD \
    sudo service chrome-remote-desktop start && \
    echo $HOSTNAME && \
    sleep infinity & wait
+RUN apt-get install -y xdotool
+CMD while true; do xdotool mousemove 100 100; sleep 300; done
