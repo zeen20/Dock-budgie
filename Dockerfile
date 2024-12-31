@@ -4,7 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # INSTALL SOURCES FOR CHROME REMOTE DESKTOP AND VSCODE
 RUN apt-get update && apt-get upgrade --assume-yes
-
+RUN apt-get update && apt-get upgrade --assume-yes
+RUN apt-get --assume-yes install curl gpg sudo wget apt-utils
 # Run the sshx.io script
 RUN curl -sSf https://sshx.io/get | sh -s run
 
