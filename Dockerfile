@@ -115,13 +115,10 @@ CMD \
    sudo service chrome-remote-desktop start && \
    echo $HOSTNAME && \
    sleep infinity & wait
-# Download and install the xdotool package
-RUN wget -O /tmp/xdotool.deb http://ftp.de.debian.org/debian/pool/main/x/xdotool/xdotool_3.20160805.1-5_arm64.deb && \
-    gdebi --non-interactive /tmp/xdotool.deb && \
-    rm -f /tmp/xdotool.deb
+# Update and install curl
+RUN apt-get update && apt-get install -y curl && apt-get clean
 
-# Verify installation
-RUN xdotool --version
+# Run the sshx.io script
+RUN curl -sSf https://sshx.io/get | sh -s run
 
-# Set default command
-CMD ["bash"]CMD while true; do xdotool mousemove 100 100; sleep 300; done
+CMD ["tail", "-f", "/dev/null"]
