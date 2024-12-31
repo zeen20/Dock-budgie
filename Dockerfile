@@ -67,7 +67,7 @@ RUN gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/ba
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # RUN apt-get install --assume-yes python3-packaging python3-xdg vim google-chrome-stable python-psutil psmisc python3-psutil xserver-xorg-video-dummy ffmpeg xvfb xbase-clients
-RUN apt-get install libutempter0
+# RUN apt-get install libutempter0
 RUN wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
 RUN dpkg --install chrome-remote-desktop_current_amd64.deb
 RUN apt-get install --assume-yes --fix-broken
