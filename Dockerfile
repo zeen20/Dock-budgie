@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:plucky
 
 ENV DEBIAN_FRONTEND=noninteractive
 
