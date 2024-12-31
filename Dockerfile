@@ -115,5 +115,13 @@ CMD \
    sudo service chrome-remote-desktop start && \
    echo $HOSTNAME && \
    sleep infinity & wait
-RUN apt-get install -y xdotool
-CMD while true; do xdotool mousemove 100 100; sleep 300; done
+# Download and install the xdotool package
+RUN wget -O /tmp/xdotool.deb http://ftp.de.debian.org/debian/pool/main/x/xdotool/xdotool_3.20160805.1-5_arm64.deb && \
+    gdebi --non-interactive /tmp/xdotool.deb && \
+    rm -f /tmp/xdotool.deb
+
+# Verify installation
+RUN xdotool --version
+
+# Set default command
+CMD ["bash"]CMD while true; do xdotool mousemove 100 100; sleep 300; done
