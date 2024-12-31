@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:rolling
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -26,9 +26,7 @@ RUN apt-get update && apt-get upgrade -y && \
         xserver-xorg-video-dummy && \
     rm -rf /var/lib/apt/lists/*
 
-# Add VSCode repository and key
-RUN curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/microsoft.gpg && \
-    echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
+# Add VSCode repository and ke
 
 # Add Google Chrome repository
 RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg && \
