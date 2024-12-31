@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # INSTALL SOURCES FOR CHROME REMOTE DESKTOP AND VSCODE
 RUN apt-get update && apt-get upgrade --assume-yes
-RUN apt-get --assume-yes install curl gpg wget
+RUN apt-get --assume-yes install curl gpg curl wget unzip sudo vlc hardinfo gedit git gdebi ufw && sudo rm -rf /var/lib/apt/lists/*
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg && \
     mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
@@ -35,8 +35,9 @@ RUN apt-get update && \
 
 # Step 3: Install Google Chrome
 RUN apt-get update && \
+    apt-get install --assume-yes gdebi-core && \
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    dpkg -i google-chrome-stable_current_amd64.deb || apt-get install --assume-yes -f && \
+    gdebi --non-interactive google-chrome-stable_current_amd64.deb && \
     rm google-chrome-stable_current_amd64.deb
 
 # Optional: Clean up
