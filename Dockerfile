@@ -25,7 +25,7 @@ RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-
 RUN apt-get install --assume-yes firefox
 # ---------------------------------------------------------- 
 # SPECIFY VARIABLES FOR SETTING UP CHROME REMOTE DESKTOP
-ARG USER=myuser
+ARG USER=baynar
 # use 6 digits at least
 ENV PIN=123456
 ENV CODE=4/xxx
