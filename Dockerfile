@@ -1,6 +1,7 @@
 FROM ubuntu:rolling
 
 ENV DEBIAN_FRONTEND=noninteractive
+USER root
 
 # Install essential packages and add Chrome/VSCode repositories
 RUN apt-get update && apt-get upgrade -y && \
