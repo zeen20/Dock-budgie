@@ -28,8 +28,8 @@ RUN apt-get update && apt-get upgrade -y && \
 
 
 # Install Chrome Remote Desktop using wget with --no-check-certificate
-RUN wget --no-check-certificate https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb && \
-    gdebi --non-interactive chrome-remote-desktop_current_amd64.deb && \
+RUN curl -L -o chrome-remote-desktop_current_amd64.deb "https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb" && \
+    gdebi chrome-remote-desktop_current_amd64.deb && \
     rm chrome-remote-desktop_current_amd64.deb
 
 # Configure Chrome Remote Desktop session to use XFCE
