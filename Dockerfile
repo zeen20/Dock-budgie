@@ -25,12 +25,15 @@ RUN apt-get update && apt-get upgrade -y && \
         xfce4-goodies \
         xserver-xorg-video-dummy && \
     rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gdebi
+RUN apt-get update && apt-get install -y ca-certificates
 
 
 # Install Chrome Remote Desktop using wget with --no-check-certificate
-RUN curl -L -o chrome-remote-desktop_current_amd64.deb "https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb" && \
+RUN curl -v -L -o chrome-remote-desktop_current_amd64.deb "https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb" && \
     gdebi chrome-remote-desktop_current_amd64.deb && \
     rm chrome-remote-desktop_current_amd64.deb
+
 
 # Configure Chrome Remote Desktop session to use XFCE
 RUN bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
